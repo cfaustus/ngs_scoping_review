@@ -1,0 +1,26 @@
+---
+title: "data exploration"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r, echo=FALSE, warning=FALSE, cache.lazy=FALSE}
+# load libraries 
+
+library(tidyverse)
+```
+
+
+```{r}
+# read data
+data <- read.csv("data/NGSscoping_dbv4.csv")
+```
+
+```{r, echo=FALSE, warning=FALSE}
+
+data |>
+  mutate(HUM_SAMPLE_SIZE = as.numeric(HUM_SAMPLE_SIZE)) |>
+  ggplot(aes((HUM_SAMPLE_SIZE))) + geom_histogram(bins = 50) + scale_x_log10() + xlab("Human sample size") + ylab("count")
+```
+
