@@ -20,7 +20,9 @@ data <- read.csv("data/NGSscoping_dbv4.csv")
 ```
 
 ```{r, echo=FALSE, fig.width = 6 ,warning=FALSE}
+# stacked histogram of sample size by compartment
 
+stacked_hist_sample_size_compartment <-
 data |>
   mutate(ARACHNIDA_SAMPLE_SIZE = as.character(ARACHNIDA_SAMPLE_SIZE)) |>
   mutate(INSECTA_SAMPLE_SIZE = as.character(INSECTA_SAMPLE_SIZE)) |>
@@ -36,12 +38,16 @@ data |>
   # facet_wrap(~compartment, nrow = 4) + 
   ggthemes::theme_clean() + 
   scale_fill_viridis_d()
-  
 
+stacked_hist_sample_size_compartment |>
+  ggsave(filename = "figures/stacked_histogram_sample_size_by_compartment.pdf", width=8)
 ```
 
 ```{r, echo=FALSE, fig.width = 6 ,warning=FALSE}
 
+#  sample size per compartment 
+
+hist_sample_size_compartment <- 
 data |>
   mutate(ARACHNIDA_SAMPLE_SIZE = as.character(ARACHNIDA_SAMPLE_SIZE)) |>
   mutate(INSECTA_SAMPLE_SIZE = as.character(INSECTA_SAMPLE_SIZE)) |>
@@ -56,7 +62,53 @@ data |>
   ylab("count") + 
   facet_wrap(~compartment, nrow = 4) +
   ggthemes::theme_clean() + 
-  scale_fill_viridis_d()
+  scale_fill_viridis_d() + 
+  theme(legend.position = "bottom")
 
+hist_sample_size_compartment <- 
+  ggsave(filename = "figures/histogram_sample_size_by_compartment.pdf", width=8, height = 8)
+
+```
+
+# Zoonotic agent
+
+```{r}
+
+discrete_palettes <- list(
+  RColorBrewer::brewer.pal(8, "Paired")
+)
+
+data |> 
+  group_by(AGENT_TYPE) |>
+  summarise(count = n()) |>
+  ggplot(aes(count, fill = AGENT_TYPE, group = AGENT_TYPE)) + 
+  geom_histogram(bins = 50) + 
+  scale_fill_discrete(type = discrete_palettes) + 
+ggthemes::theme_clean()
+
+n_studies_dist_by_agent_type <- 
+data |>
+  group_by(AGENT_TYPE, ZOONOTIC_AGENT) |>
+  summarise(count = n()) |>
+  group_by(AGENT_TYPE, count) |>
+  summarise(n_studies = n()) |>
+  ggplot(aes(n_studies, count, fill = AGENT_TYPE)) + geom_col() + facet_wrap(~AGENT_TYPE, nrow=2 ) + 
+  scale_fill_discrete(type = discrete_palettes) + 
+  ggthemes::theme_clean() + 
+  xlab("Number of studies") + 
+  ylab("Count") +
+  theme(legend.position = "none")
+
+n_studies_dist_by_agent_type |>
+  ggsave(filename = "figures/number_of_studies_by_agent_type.pdf", width = 7, height = 4)
+```
+
+# Study AIM 1 
+
+```{r}
+data |> 
+  group_by(STUDY_AIM1) |>
+  summarise(count = n()) |>
+  ggplot(aes(STUDY_AIM_1, count, fill = STUDY_AIM_1)) + geom_col()
 ```
 
