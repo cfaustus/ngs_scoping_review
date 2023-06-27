@@ -19,22 +19,44 @@ library(patchwork)
 data <- read.csv("data/NGSscoping_dbv4.csv")
 ```
 
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, fig.width = 6 ,warning=FALSE}
 
 data |>
-  select(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE) |>
-  pivot_longer(cols = c(HUM_SAMPLE_SIZE,POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE), names_to = "compartment" , values_to = "sample size") |>
+  mutate(ARACHNIDA_SAMPLE_SIZE = as.character(ARACHNIDA_SAMPLE_SIZE)) |>
+  mutate(INSECTA_SAMPLE_SIZE = as.character(INSECTA_SAMPLE_SIZE)) |>
+  select(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC.ENV_SAMPLE_SIZE) |>
+  pivot_longer(cols = c(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC.ENV_SAMPLE_SIZE), names_to = "compartment" , values_to = "sample size") |>
   separate(col = "compartment", into = c("compartment", NA, NA), sep = "_", extra = "drop") |>
   mutate(`sample size` = as.numeric(`sample size`)) |>
-  mutate(compartment = ifelse(compartment == "HUM", "HUMAN", compartment)) |> ggplot(aes(`sample size`)) + 
+  mutate(compartment = ifelse(compartment == "HUM", "HUMAN", compartment)) |> ggplot(aes(`sample size`, group = compartment, fill = compartment)) + 
   geom_histogram(bins = 50) + 
   scale_x_log10() + 
   xlab("Sample size") + 
   ylab("count") + 
-  facet_wrap(~compartment, nrow = 2) + 
-  ggthemes::theme_clean()
+  # facet_wrap(~compartment, nrow = 4) + 
+  ggthemes::theme_clean() + 
+  scale_fill_viridis_d()
   
 
 ```
 
+```{r, echo=FALSE, fig.width = 6 ,warning=FALSE}
+
+data |>
+  mutate(ARACHNIDA_SAMPLE_SIZE = as.character(ARACHNIDA_SAMPLE_SIZE)) |>
+  mutate(INSECTA_SAMPLE_SIZE = as.character(INSECTA_SAMPLE_SIZE)) |>
+  select(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC.ENV_SAMPLE_SIZE) |>
+  pivot_longer(cols = c(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC.ENV_SAMPLE_SIZE), names_to = "compartment" , values_to = "sample size") |>
+  separate(col = "compartment", into = c("compartment", NA, NA), sep = "_", extra = "drop") |>
+  mutate(`sample size` = as.numeric(`sample size`)) |>
+  mutate(compartment = ifelse(compartment == "HUM", "HUMAN", compartment)) |> ggplot(aes(`sample size`, group = compartment, fill = compartment)) + 
+  geom_histogram(bins = 20) + 
+  scale_x_log10() + 
+  xlab("Sample size") + 
+  ylab("count") + 
+  facet_wrap(~compartment, nrow = 4) +
+  ggthemes::theme_clean() + 
+  scale_fill_viridis_d()
+
+```
 
