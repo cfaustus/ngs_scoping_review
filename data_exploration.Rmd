@@ -14,7 +14,7 @@ library(patchwork)
 ```
 
 
-```{r}
+```{r, echo=FALSE, warning=FALSE}
 # read data
 data <- read.csv("data/NGSscoping_dbv4.csv")
 ```
@@ -92,23 +92,39 @@ data |>
   summarise(count = n()) |>
   group_by(AGENT_TYPE, count) |>
   summarise(n_studies = n()) |>
-  ggplot(aes(n_studies, count, fill = AGENT_TYPE)) + geom_col() + facet_wrap(~AGENT_TYPE, nrow=2 ) + 
+  ggplot(aes(count, n_studies, fill = AGENT_TYPE)) + geom_col() + facet_wrap(~AGENT_TYPE, nrow=2 ) + 
   scale_fill_discrete(type = discrete_palettes) + 
   ggthemes::theme_clean() + 
-  xlab("Number of studies") + 
-  ylab("Count") +
-  theme(legend.position = "none")
+  theme(legend.position = "none") + xlab("Number of species") + ylab("Number of studies")
 
 n_studies_dist_by_agent_type |>
   ggsave(filename = "figures/number_of_studies_by_agent_type.pdf", width = 7, height = 4)
 ```
 
-# Study AIM 1 
+# Number of studies by sampling range 
 
-```{r}
+```{r, warning= FALSE, echo=FALSE}
+
+# not sure how to treat "N/S" in SAMPLING_YEAR.S. 
+
+discrete_palettes <- list(
+  RColorBrewer::brewer.pal(8, "Paired")
+)
+
 data |> 
-  group_by(STUDY_AIM1) |>
-  summarise(count = n()) |>
-  ggplot(aes(STUDY_AIM_1, count, fill = STUDY_AIM_1)) + geom_col()
+  separate(SAMPLING_YEAR.S., sep = "-", into = c("START", "END", NA), extra="drop", fill = "warn") |>
+  mutate(END = ifelse(is.na(END), START, END)) |>
+  filter(START != "N/S") |>
+  mutate(START = as.numeric(START)) |>
+  mutate(END = as.numeric(END)) |> 
+  mutate(SAMPLING_RANGE = (END+1)-START) |>
+  # group_by(AGENT_TYPE, SAMPLING_RANGE) |>
+  # summarise(count = n()) |>
+  ggplot(aes(SAMPLING_RANGE, fill = AGENT_TYPE)) + geom_histogram(bins=100) + 
+  # ggplot(aes(SAMPLING_RANGE, count, fill = AGENT_TYPE)) + geom_col() + 
+  ggthemes::theme_clean() + 
+  scale_fill_discrete(type = discrete_palettes) + theme(legend.position = "bottom")
+
+
 ```
 
