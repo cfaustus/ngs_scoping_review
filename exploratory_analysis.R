@@ -7,3 +7,31 @@ hist(log10(ngsscop_dbv4$ANI_SAMPLE_SIZE+1))
 hist(log10(as.numeric(ngsscop_dbv4$HUM_SAMPLE_SIZE)))
 
 # need to fix column name importations .. not showing up as correct values
+sort(unique(ngsscop_dbv4$PUBLICATION_YEAR))
+library(ggplot2)
+ggplot(ngsscop_dbv4, aes(x=PUBLICATION_YEAR, fill=AGENT_TYPE)) +
+  geom_histogram(col = 'white', position="stack", bins = 12)+
+  theme(legend.position="top")+
+  theme_classic()+
+  labs(x="year published", y = "publications")+
+  scale_y_continuous(expand = c(0, 0), breaks=seq(0,23,2))+
+  scale_x_continuous(breaks=seq(2011,2022,1))
+  
+sort(unique())
+names(ngsscop_dbv4)
+ggplot(ngsscop_dbv4, aes(x=PUBLICATION_YEAR, fill=NGS_PLATFORM_SHORT_PRIMARY)) +
+  geom_histogram(col = 'white', position="stack", bins = 12)+
+  theme(legend.position="top")+
+  theme_classic()+
+  labs(x="year published", y = "publications")+
+  scale_y_continuous(expand = c(0, 0), breaks=seq(0,23,2))+
+  scale_x_continuous(breaks=seq(2011,2022,1))
+
+ggplot(ngsscop_dbv4, aes(x=PUBLICATION_YEAR, fill=STUDY_AIM_1)) +
+  geom_histogram(col = 'white', position="stack", bins = 12)+
+  theme(legend.position="top")+
+  theme_classic()+
+  labs(x="year published", y = "publications")+
+  scale_y_continuous(expand = c(0, 0), breaks=seq(0,23,2))+
+  scale_x_continuous(breaks=seq(2011,2022,1))
+
