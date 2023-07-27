@@ -1,5 +1,10 @@
-library(readr)
-ngsscop_dbv4 <- read_csv("data/NGSscoping_dbv4.csv")
+# code to explore and visualize dataset
+
+# libraries
+library(ggplot2)
+
+# importing and correctly formatting data
+ngsscop_dbv4 <- read.csv("data/NGSscoping_dbv4.csv", header = TRUE)
 spec(ngsscop_dbv4)
 samples = grepl('SAMPLE_SIZE',names(ngsscop_dbv4))
 ngsscop_dbv4 %>% mutate_if(samples, as.double)  
