@@ -68,3 +68,6 @@ ggplot(db4, aes(x=total_samples, y = total_domains, col=agent_type)) +
   theme_classic()+
   labs(x="total samples", y = "domains")+
   scale_x_continuous(trans='log10')
+
+# https://cran.r-project.org/web/packages/ggalluvial/vignettes/ggalluvial.html
+head(db4)
