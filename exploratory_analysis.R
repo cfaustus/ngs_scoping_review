@@ -2,6 +2,7 @@
 
 # libraries
 library(ggplot2)
+library(ggalluvial)
 
 # importing and correctly formatting data
 db4 <- read.csv("data/NGSscoping_dbv4.csv", header = TRUE)
@@ -18,13 +19,21 @@ col.chr.ids = c('hum_sample_size','livestock_sample_size', 'pet_sample_size','po
 db4[col.chr.ids] <- sapply(db4[col.chr.ids],as.numeric)
 str(db4)
 
-sample_cols = grep('sample_size',names(db4)) # identifying sample size columns
-db4$total_samples = rowSums(db4[,sample_cols], na.rm=TRUE)
+#sample_cols = grep('sample_size',names(db4)) # identifying sample size columns - WRONG double counting
+db4$total_samples = rowSums(db4[,c('hum_sample_size','ani_sample_size', 'env_domain')], na.rm=TRUE)
 db4$env_bin = ifelse(db4$env_domain>0,1,0)
 db4$ani_bin = ifelse(db4$ani_sample_size>0,1,0)
 db4$human_bin = ifelse(db4$hum_sample_size>0,1,0)
 db4$total_domains = rowSums(db4[,c('env_bin','ani_bin','human_bin')], na.rm=T)
+
 # some are 0?!? and some are 1?
+# annotation in excel clarified there were 276 samples from human and environment but split not given
+db4$total_domains[19]<-2
+db4$total_samples[19]<-276
+db4$env_bin[19] = 1
+db4$human_bin[19] = 1
+
+
 
 # by publication year
 sort(unique(db4$publication_year))
@@ -70,4 +79,16 @@ ggplot(db4, aes(x=total_samples, y = total_domains, col=agent_type)) +
   scale_x_continuous(trans='log10')
 
 # https://cran.r-project.org/web/packages/ggalluvial/vignettes/ggalluvial.html
-head(db4)
+head(db)
+db4_allu = is_alluvia_form(as.data.frame(db4), axes = 1:3, silent = TRUE)
+ggplot(data = db4,
+       aes(x = publication_year, y = total_samples, alluvium = study_aim_1)) +
+  geom_alluvium(aes(fill = study_aim_1, colour = study_aim_1),
+                alpha = .75, decreasing = FALSE) 
+  scale_x_continuous(breaks = seq(2003, 2013, 2)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = -30, hjust = 0)) +
+  scale_fill_brewer(type = "qual", palette = "Set3") +
+  scale_color_brewer(type = "qual", palette = "Set3") +
+  facet_wrap(~ region, scales = "fixed") +
+  ggtitle("refugee volume by country and region of origin")
