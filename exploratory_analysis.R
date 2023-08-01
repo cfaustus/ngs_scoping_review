@@ -3,6 +3,7 @@
 # libraries
 library(ggplot2)
 library(ggalluvial)
+library(dplyr)
 
 # importing and correctly formatting data
 db4 <- read.csv("data/NGSscoping_dbv4.csv", header = TRUE)
@@ -92,3 +93,17 @@ ggplot(data = db4,
   scale_color_brewer(type = "qual", palette = "Set3") +
   facet_wrap(~ region, scales = "fixed") +
   ggtitle("refugee volume by country and region of origin")
+  
+
+db4$ngs_platform_short_primary
+
+
+
+
+db4_summary = as.data.frame(db4 %>% group_by(ngs_platform_short_primary, publication_year) %>%
+                                summarise(papers = n()))
+
+ggplot(db4, aes(x = publication_year, y =ngs_platform_short_primary )) +
+  geom_dotplot(stackgroups = TRUE, binwidth = 1, method = "histodot", binaxis = "y")+ # aes(dotsize = papers),
+  scale_x_continuous(breaks=seq(2011,2022,1))+
+  theme_classic()
