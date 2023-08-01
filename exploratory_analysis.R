@@ -80,7 +80,7 @@ ggplot(db4, aes(x=total_samples, y = total_domains, col=agent_type)) +
   scale_x_continuous(trans='log10')
 
 # https://cran.r-project.org/web/packages/ggalluvial/vignettes/ggalluvial.html
-head(db)
+head(db4)
 db4_allu = is_alluvia_form(as.data.frame(db4), axes = 1:3, silent = TRUE)
 ggplot(data = db4,
        aes(x = publication_year, y = total_samples, alluvium = study_aim_1)) +
@@ -96,20 +96,22 @@ ggplot(data = db4,
   
 
 db4$ngs_platform_short_primary
-
-
-
-
-db4_summary = as.data.frame(db4 %>% group_by(ngs_platform_short_primary, publication_year) %>%
+head(db4)
+db4_summary = as.data.frame(db4 %>% group_by(ngs_platform_short_primary, publication_year, ngs_platform_company) %>%
                                 summarise(papers = n()))
+db4_summary$ngs_platform_short_primary=as.factor(db4_summary$ngs_platform_short_primary)
 
-ggplot(db4_summary, aes(x = publication_year, y =ngs_platform_short_primary )) +
-  geom_point(aes(size = papers))+ # aes(dotsize = papers),
+db4_summary = db4_summary[1:45,]
+db4_summary$ngs_platform_short_primary
+ggplot(db4_summary, aes(x = publication_year, y = ngs_platform_short_primary )) +
+  geom_point(aes(size = papers, color = ngs_platform_company))+ # aes(dotsize = papers),
   scale_x_continuous(breaks=seq(2011,2022,1))+
   theme_classic()+
-  scale_color_continuous(breaks = c(min(data$y),
-                                    mean(data$y),
-                                    max(data$y)),
-                         labels = c("Min",
-                                    "Mean",
-                                    "Max"))
+  labs(x="publication year", y = "sequencer")+
+  scale_size_continuous(breaks = c(min(db4_summary$papers),
+                                    3,
+                                    max(db4_summary$papers)),
+                         labels = c("1",
+                                    "3",
+                                    "9"))
+
