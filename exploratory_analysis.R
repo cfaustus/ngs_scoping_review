@@ -103,7 +103,13 @@ db4$ngs_platform_short_primary
 db4_summary = as.data.frame(db4 %>% group_by(ngs_platform_short_primary, publication_year) %>%
                                 summarise(papers = n()))
 
-ggplot(db4, aes(x = publication_year, y =ngs_platform_short_primary )) +
-  geom_dotplot(stackgroups = TRUE, binwidth = 1, method = "histodot", binaxis = "y")+ # aes(dotsize = papers),
+ggplot(db4_summary, aes(x = publication_year, y =ngs_platform_short_primary )) +
+  geom_point(aes(size = papers))+ # aes(dotsize = papers),
   scale_x_continuous(breaks=seq(2011,2022,1))+
-  theme_classic()
+  theme_classic()+
+  scale_color_continuous(breaks = c(min(data$y),
+                                    mean(data$y),
+                                    max(data$y)),
+                         labels = c("Min",
+                                    "Mean",
+                                    "Max"))
