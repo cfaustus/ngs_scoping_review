@@ -114,4 +114,4 @@ ggplot(db4_summary, aes(x = publication_year, y = ngs_platform_short_primary )) 
                          labels = c("1",
                                     "3",
                                     "9"))
-
+# need to combine short read and long read sequencing
