@@ -103,6 +103,19 @@ db4_summary$ngs_platform_short_primary=as.factor(db4_summary$ngs_platform_short_
 
 db4_summary = db4_summary[1:45,]
 db4_summary$ngs_platform_short_primary
+unique(db4$ngs_platform_long)
+
+db4_summary$ngs_platform_short_primary = as.factor(db4_summary$ngs_platform_short_primary)
+
+levels(db4_summary$ngs_platform_short_primary)
+db4_summary$ngs_platform_short_primary <- factor(db4_summary$ngs_platform_short_primary, 
+                levels = c("Illumina_NovaSeq","BGI_MGISEQ2000", 
+                           "Illumina_iSeq100","BGI_BGISEQ50", 
+                           "BGI_BGISEQ500", "Illumina_NextSeq", 
+                           "Illumina_MiSeq", "IonTorrent_IonPGM", 
+                           "Illumina_HiSeq", "Illumina_GAIIx", 
+                            "Roche_454"))
+
 ggplot(db4_summary, aes(x = publication_year, y = ngs_platform_short_primary )) +
   geom_point(aes(size = papers, color = ngs_platform_company))+ # aes(dotsize = papers),
   scale_x_continuous(breaks=seq(2011,2022,1))+
