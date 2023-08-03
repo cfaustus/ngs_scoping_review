@@ -115,3 +115,13 @@ ggplot(db4_summary, aes(x = publication_year, y = ngs_platform_short_primary )) 
                                     "3",
                                     "9"))
 # need to combine short read and long read sequencing
+
+# is within host diversity studies predicted by mutation rate?
+# maybe not relevant b/c no host diversity
+
+# alluvial plot to make
+# open data 
+# open software
+# open code
+# colored by country?
+
