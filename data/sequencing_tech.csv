@@ -1,0 +1,14 @@
+company,type,start,end
+Roche,454,2007,2013
+Illumina,GAIIx,2007,
+Illumina,HiSeq,2010,
+Ion Torrent,IonPGM,2011,
+Illumina,MiSeq,2011,
+PacBio,RSII,2013,
+Illumina,NextSeq,2014,
+ONT,MinION,2015,
+BGI,BGISEQ500,2016,
+BGI,BGISEQ50,2016,
+Illumina,iSeq100,2018,
+BGI,MGISEQ2000,2018,
+Illumina,NovaSeq,2022,
