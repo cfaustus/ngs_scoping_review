@@ -137,4 +137,20 @@ ggplot(db4_summary, aes(x = publication_year, y = ngs_platform_short_primary )) 
 # open software
 # open code
 # colored by country?
+db4$public_data_binary = !db4$public_data == 'N/A'
+db4$public_code_binary = db4$public_code == 'yes'
+db4$phylo_software_binary = !db4$phylo_software == 'Geneious'
+db4$sampling_geo
 
+db4_summary2 = as.data.frame(db4 %>% group_by(public_data_binary, public_code_binary, phylo_software_binary,sampling_geo) %>%
+                              summarise(Freq = n()))
+
+ggplot(data = db4_summary2,
+       aes(axis1 = as.factor(phylo_software_binary), axis2 = public_data_binary,axis3 = public_code_binary, 
+           y = Freq)) +
+  scale_x_discrete(limits = c("software", "data", "code"), expand = c(.2, .05)) +
+  xlab("open science") +
+  geom_alluvium(aes(fill = sampling_geo)) +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  theme_minimal() 
