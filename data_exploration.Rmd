@@ -11,6 +11,7 @@ editor_options:
 library(tidyverse)
 library(ggpubr)
 library(patchwork)
+library(ggsci)
 ```
 
 
@@ -46,29 +47,57 @@ stacked_hist_sample_size_compartment
 
 ```{r, echo=FALSE, fig.width = 6 ,warning=FALSE}
 
-#  sample size per compartment 
+#  sample size per compartment x study aim
 
-hist_sample_size_compartment <- 
+hist_sample_size_compartment_aim <-
 data |>
   mutate(ARACHNIDA_SAMPLE_SIZE = as.character(ARACHNIDA_SAMPLE_SIZE)) |>
   mutate(INSECTA_SAMPLE_SIZE = as.character(INSECTA_SAMPLE_SIZE)) |>
-  select(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC.ENV_SAMPLE_SIZE) |>
+  select(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC.ENV_SAMPLE_SIZE, STUDY_AIM_1) |>
   pivot_longer(cols = c(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC.ENV_SAMPLE_SIZE), names_to = "compartment" , values_to = "sample size") |>
   separate(col = "compartment", into = c("compartment", NA, NA), sep = "_", extra = "drop") |>
   mutate(`sample size` = as.numeric(`sample size`)) |>
-  mutate(compartment = ifelse(compartment == "HUM", "HUMAN", compartment)) |> ggplot(aes(`sample size`, group = compartment, fill = compartment)) + 
+  mutate(compartment = ifelse(compartment == "HUM", "HUMAN", compartment)) |>
+ggplot(aes(`sample size`, group = STUDY_AIM_1, fill = STUDY_AIM_1)) + 
   geom_histogram(bins = 20) + 
   scale_x_log10() + 
   xlab("Sample size") + 
   ylab("count") + 
   facet_wrap(~compartment, nrow = 4) +
   ggthemes::theme_clean() + 
-  scale_fill_viridis_d() + 
+  scale_fill_rickandmorty() + 
   theme(legend.position = "bottom")
 
 hist_sample_size_compartment
-# hist_sample_size_compartment <- 
-#   ggsave(filename = "figures/histogram_sample_size_by_compartment.pdf", width=8, height = 8)
+hist_sample_size_compartment_aim <-
+  ggsave(filename = "figures/histogram_sample_size_by_compartment_colored_by_study_aim.pdf", width=14, height = 8)
+
+
+
+hist_sample_size_compartment_agent_type <-
+data |>
+  mutate(ARACHNIDA_SAMPLE_SIZE = as.character(ARACHNIDA_SAMPLE_SIZE)) |>
+  mutate(INSECTA_SAMPLE_SIZE = as.character(INSECTA_SAMPLE_SIZE)) |>
+  select(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC.ENV_SAMPLE_SIZE, AGENT_TYPE) |>
+  pivot_longer(cols = c(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC.ENV_SAMPLE_SIZE), names_to = "compartment" , values_to = "sample size") |>
+  separate(col = "compartment", into = c("compartment", NA, NA), sep = "_", extra = "drop") |>
+  mutate(`sample size` = as.numeric(`sample size`)) |>
+  mutate(compartment = ifelse(compartment == "HUM", "HUMAN", compartment)) |>
+  mutate(AGENT_TYPE = ifelse(str_detect(AGENT_TYPE, "bacterium") == TRUE, "bacterium", AGENT_TYPE)) |>
+     mutate(AGENT_TYPE = ifelse(str_detect(AGENT_TYPE, "virus") == TRUE, "virus", AGENT_TYPE)) |>
+ggplot(aes(`sample size`, group = AGENT_TYPE, fill = AGENT_TYPE)) + 
+  geom_histogram(bins = 20) + 
+  scale_x_log10() + 
+  xlab("Sample size") + 
+  ylab("count") + 
+  facet_wrap(~compartment, nrow = 4) +
+  ggthemes::theme_clean() + 
+  scale_fill_manual(values = c("orange1", "skyblue1","gold1", "purple1", "violetred1",  "royalblue2", "darkgreen")) + 
+  theme(legend.position = "bottom")
+
+
+hist_sample_size_compartment_agent_type <-
+  ggsave(filename = "figures/histogram_sample_size_by_compartment_colored_by_agent_type.pdf", width=14, height = 8)
 
 ```
 
