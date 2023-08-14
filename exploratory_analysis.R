@@ -154,3 +154,5 @@ ggplot(data = db4_summary2,
   geom_stratum() +
   geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
   theme_minimal() 
+# need to update with stefano's linkages
+# figure - sample size by HG status?
