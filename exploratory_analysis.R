@@ -156,3 +156,4 @@ ggplot(data = db4_summary2,
   theme_minimal() 
 # need to update with stefano's linkages
 # figure - sample size by HG status?
+# software updates? license 
