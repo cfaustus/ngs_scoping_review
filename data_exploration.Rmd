@@ -12,12 +12,16 @@ library(tidyverse)
 library(ggpubr)
 library(patchwork)
 library(ggsci)
+library(readxl)
+
 ```
 
 
 ```{r, echo=FALSE, warning=FALSE}
 # read data
-data <- read.csv("data/NGSscoping_dbv4.csv")
+
+data <- read_excel("data/NGSscoping_dbv5.xlsx")
+
 ```
 
 ```{r, echo=FALSE, fig.width = 6 ,warning=FALSE}
@@ -27,8 +31,8 @@ stacked_hist_sample_size_compartment <-
 data |>
   mutate(ARACHNIDA_SAMPLE_SIZE = as.character(ARACHNIDA_SAMPLE_SIZE)) |>
   mutate(INSECTA_SAMPLE_SIZE = as.character(INSECTA_SAMPLE_SIZE)) |>
-  select(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC.ENV_SAMPLE_SIZE) |>
-  pivot_longer(cols = c(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC.ENV_SAMPLE_SIZE), names_to = "compartment" , values_to = "sample size") |>
+  select(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, `BIOTIC-ENV_SAMPLE_SIZE`) |>
+  pivot_longer(cols = c(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, `BIOTIC-ENV_SAMPLE_SIZE`), names_to = "compartment" , values_to = "sample size") |>
   separate(col = "compartment", into = c("compartment", NA, NA), sep = "_", extra = "drop") |>
   mutate(`sample size` = as.numeric(`sample size`)) |>
   mutate(compartment = ifelse(compartment == "HUM", "HUMAN", compartment)) |> ggplot(aes(`sample size`, group = compartment, fill = compartment)) + 
@@ -45,7 +49,7 @@ stacked_hist_sample_size_compartment
 #   ggsave(filename = "figures/stacked_histogram_sample_size_by_compartment.pdf", width=8)
 ```
 
-```{r, echo=FALSE, fig.width = 6 ,warning=FALSE}
+```{r, echo=FALSE, fig.width = 8 ,warning=FALSE}
 
 #  sample size per compartment x study aim
 
@@ -53,8 +57,8 @@ hist_sample_size_compartment_aim <-
 data |>
   mutate(ARACHNIDA_SAMPLE_SIZE = as.character(ARACHNIDA_SAMPLE_SIZE)) |>
   mutate(INSECTA_SAMPLE_SIZE = as.character(INSECTA_SAMPLE_SIZE)) |>
-  select(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC.ENV_SAMPLE_SIZE, STUDY_AIM_1) |>
-  pivot_longer(cols = c(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC.ENV_SAMPLE_SIZE), names_to = "compartment" , values_to = "sample size") |>
+  select(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, `BIOTIC-ENV_SAMPLE_SIZE`, STUDY_AIM_1) |>
+  pivot_longer(cols = c(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, `BIOTIC-ENV_SAMPLE_SIZE`), names_to = "compartment" , values_to = "sample size") |>
   separate(col = "compartment", into = c("compartment", NA, NA), sep = "_", extra = "drop") |>
   mutate(`sample size` = as.numeric(`sample size`)) |>
   mutate(compartment = ifelse(compartment == "HUM", "HUMAN", compartment)) |>
@@ -66,20 +70,22 @@ ggplot(aes(`sample size`, group = STUDY_AIM_1, fill = STUDY_AIM_1)) +
   facet_wrap(~compartment, nrow = 4) +
   ggthemes::theme_clean() + 
   scale_fill_rickandmorty() + 
-  theme(legend.position = "bottom")
+  theme(legend.position = "right")
 
-hist_sample_size_compartment
+hist_sample_size_compartment_aim
 hist_sample_size_compartment_aim <-
   ggsave(filename = "figures/histogram_sample_size_by_compartment_colored_by_study_aim.pdf", width=14, height = 8)
 
+```
 
+```{r, echo=FALSE, fig.width = 8 ,warning=FALSE}
 
 hist_sample_size_compartment_agent_type <-
 data |>
   mutate(ARACHNIDA_SAMPLE_SIZE = as.character(ARACHNIDA_SAMPLE_SIZE)) |>
   mutate(INSECTA_SAMPLE_SIZE = as.character(INSECTA_SAMPLE_SIZE)) |>
-  select(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC.ENV_SAMPLE_SIZE, AGENT_TYPE) |>
-  pivot_longer(cols = c(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC.ENV_SAMPLE_SIZE), names_to = "compartment" , values_to = "sample size") |>
+  select(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, `BIOTIC-ENV_SAMPLE_SIZE`, AGENT_TYPE) |>
+  pivot_longer(cols = c(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, `BIOTIC-ENV_SAMPLE_SIZE`), names_to = "compartment" , values_to = "sample size") |>
   separate(col = "compartment", into = c("compartment", NA, NA), sep = "_", extra = "drop") |>
   mutate(`sample size` = as.numeric(`sample size`)) |>
   mutate(compartment = ifelse(compartment == "HUM", "HUMAN", compartment)) |>
@@ -92,18 +98,20 @@ ggplot(aes(`sample size`, group = AGENT_TYPE, fill = AGENT_TYPE)) +
   ylab("count") + 
   facet_wrap(~compartment, nrow = 4) +
   ggthemes::theme_clean() + 
-  scale_fill_manual(values = c("orange1", "skyblue1","gold1", "purple1", "violetred1",  "royalblue2", "darkgreen")) + 
+  scale_fill_manual(values = c("skyblue2", "royalblue3", "green4", "lightpink2", "orange1")) + 
   theme(legend.position = "bottom")
 
 
-hist_sample_size_compartment_agent_type <-
+hist_sample_size_compartment_agent_type
+hist_sample_size_compartment_agent_type |>
   ggsave(filename = "figures/histogram_sample_size_by_compartment_colored_by_agent_type.pdf", width=14, height = 8)
 
 ```
 
 # Zoonotic agent
 
-```{r}
+```{r, echo=FALSE, fig.width = 6 ,warning=FALSE}
+
 
 discrete_palettes <- list(
   RColorBrewer::brewer.pal(8, "Paired")
@@ -136,7 +144,7 @@ n_studies_dist_by_agent_type
 
 # Number of studies by sampling range 
 
-```{r, warning= FALSE, echo=FALSE}
+```{r, echo=FALSE, fig.width = 6 ,warning=FALSE}
 
 # not sure how to treat "N/S" in SAMPLING_YEAR.S. 
 
@@ -146,27 +154,58 @@ discrete_palettes <- list(
 
 n_studies_by_sampling_range_and_agent_type <- 
 data |> 
-  separate(SAMPLING_YEAR.S., sep = "-", into = c("START", "END", NA), extra="drop", fill = "warn", remove = FALSE) |>
-  mutate(END = ifelse(is.na(END), START, END)) |>
-  mutate(START = ifelse(START == "N/S", NA, START)) |>
-  mutate(END = ifelse(START == "N/S", NA, END)) |>
-  mutate(START = as.numeric(START)) |>
-  mutate(END = as.numeric(END)) |> 
-  mutate(SAMPLING_RANGE = (END+1)-START) |>
+  # separate(SAMPLING_YEAR.S., sep = "-", into = c("START", "END", NA), extra="drop", fill = "warn", remove = FALSE) |>
+  # mutate(END = ifelse(is.na(END), START, END)) |>
+  # mutate(START = ifelse(START == "N/S", NA, START)) |>
+  # mutate(END = ifelse(START == "N/S", NA, END)) |>
+  # mutate(START = as.numeric(START)) |>
+  # mutate(END = as.numeric(END)) |> 
+  mutate(SAMPLING_RANGE = as.numeric(LAST_SAMPLE_DATE)-as.numeric(FIRST_SAMPLE_DATE)) |>
   mutate(SAMPLING_RANGE = ifelse(is.na(SAMPLING_RANGE), -5, SAMPLING_RANGE)) |> 
   # group_by(AGENT_TYPE, SAMPLING_RANGE) |>
   # summarise(count = n()) >
   ggplot(aes(SAMPLING_RANGE, fill = AGENT_TYPE)) +
   # geom_bar() +
-  geom_histogram(bins=100) + 
-  # ggplot(aes(SAMPLING_RANGE, count, fill = AGENT_TYPE)) + geom_col() + 
+  geom_histogram(bins=20) + 
+facet_wrap(~AGENT_TYPE, nrow=2 ) +   # ggplot(aes(SAMPLING_RANGE, count, fill = AGENT_TYPE)) + geom_col() + 
   ggthemes::theme_clean() + 
-  scale_fill_discrete(type = discrete_palettes) + theme(legend.position = "bottom")
+  scale_fill_discrete(type = discrete_palettes) + theme(legend.position = "none")
 
 n_studies_by_sampling_range_and_agent_type
 
 n_studies_by_sampling_range_and_agent_type |>
   ggsave(filename = "figures/stacked_histogram_number_of_studies_and_sampling_range.pdf", width = 8)
 
+```
+
+
+
+```{r, echo=FALSE, fig.width = 8 ,warning=FALSE}
+
+Assembly_license <-
+data |>
+  group_by(`ASSEMBLY/MAPPING_LICENSE`) |>
+  summarise(`Assembly/Mapping` = n()) |>
+  rename(LICENSE = `ASSEMBLY/MAPPING_LICENSE`)
+  
+software_license <-
+data |>
+  group_by(PHYLO_LICENSE) |>
+  summarise(Phylo = n()) |>
+  rename(LICENSE = PHYLO_LICENSE) |>
+  left_join(Assembly_license) |>
+  pivot_longer(cols = c(Phylo, `Assembly/Mapping`), names_to = "Software")
+
+software_license |>
+  ggplot(aes(LICENSE, value, fill = Software)) + geom_col(stat = "identity", position = position_dodge()) +   scale_fill_manual(values = c("turquoise3", "royalblue1")) + 
+  ggthemes::theme_clean()
+
+```
+
+```{r}
+
+data |>
+  group_by(PHYLO_RESULTS, PHYLO_MODEL) |>
+  summarise(n())
 ```
 
