@@ -202,10 +202,26 @@ software_license |>
 
 ```
 
-```{r}
+```{r, echo=FALSE, fig.width = 8 ,warning=FALSE}
+
+
+discrete_palettes <- list(
+  RColorBrewer::brewer.pal(8, "Spectral")
+)
+
 
 data |>
   group_by(PHYLO_RESULTS, PHYLO_MODEL) |>
-  summarise(n())
+  summarise(count = n()) |>
+  separate(PHYLO_MODEL, sep = "\\+", into = c("m1", "m2", "m3")) |>
+  pivot_longer(cols = c(m1, m2, m3), names_to = "model") |>
+  group_by(PHYLO_RESULTS, value) |>
+  summarise(freq = sum(count)) |>
+  rename(PHYLO_MODEL = value) |>
+  ungroup() |>
+  complete(PHYLO_RESULTS, PHYLO_MODEL, fill = list(freq = 0)) |>
+  filter(!(is.na(PHYLO_MODEL))) |>
+  ggplot(aes(PHYLO_MODEL, freq, fill = PHYLO_RESULTS)) + geom_col(stat = "identity", position = position_dodge()) + ggthemes::scale_fill_pander() + ggthemes::theme_clean() + xlab("Phylo Model") + theme(legend.position="top",legend.justification="centre")
+
 ```
 
