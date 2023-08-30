@@ -157,3 +157,28 @@ ggplot(data = db4_summary2,
 # need to update with stefano's linkages
 # figure - sample size by HG status?
 # software updates? license 
+
+db5 = read.csv('data/NGSscoping_dbv5.csv')
+names(db5)<-tolower(names(db5))
+db5$geo_scope = ifelse(db5$lic_lmic == 'yes' & db5$umic_hic == 'yes', 'both',
+                       ifelse(db5$lic_lmic == 'yes', 'lmic', 'hic'))
+
+db5$public_code
+db5$public_data_binary = !db5$public_data == 'N/A'
+db5$public_code_binary = db5$public_code == 'yes'
+db5$phylo_software_binary = db5$assembly.mapping_license == 'free'
+db5_summary2 = as.data.frame(db5 %>% group_by(public_data_binary, public_code_binary, phylo_software_binary,geo_scope) %>%
+                               summarise(Freq = n()))
+
+db5_summary2$geo_scope = as.factor(db5_summary2$geo_scope)
+db5_summary2$geo_scope = factor(db5_summary2$geo_scope, levels = c('lmic','both','hic'))
+ggplot(data = db5_summary2,
+       aes(axis1 = phylo_software_binary, axis2 = public_data_binary,axis3 = public_code_binary, 
+           y = Freq)) +
+  scale_x_discrete(limits = c("software", "data", "code"), expand = c(.2, .05)) +
+  xlab("open science") +
+  geom_alluvium(aes(fill = geo_scope)) +
+  scale_fill_manual(values = c('#0c2c84','#7fcdbb', '#edf8b1'))+
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  theme_classic() 
