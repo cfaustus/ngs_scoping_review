@@ -182,3 +182,34 @@ ggplot(data = db5_summary2,
   geom_stratum() +
   geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
   theme_classic() 
+
+db5 = read.csv('data/NGSscoping_dbv5.csv')
+names(db5)<-tolower(names(db5))
+
+col.chr.ids = c('hum_sample_size','livestock_sample_size', 'pet_sample_size','poultry_sample_size',
+                'wildlife_sample_size','arachnida_sample_size', 'insecta_sample_size', 'env_domain',
+                'biotic.env_sample_size','abiotic_sample_size')
+names(db5)
+db5[col.chr.ids] <- sapply(db5[col.chr.ids],as.numeric)
+str(db5)
+
+db5$total_samples = rowSums(db5[,c('hum_sample_size','ani_sample_size', 'env_domain')], na.rm=TRUE)
+db5$env_bin = ifelse(db5$env_domain>0,1,0)
+db5$ani_bin = ifelse(db5$ani_sample_size>0,1,0)
+db5$human_bin = ifelse(db5$hum_sample_size>0,1,0)
+db5$total_domains = rowSums(db5[,c('env_bin','ani_bin','human_bin')], na.rm=T)
+
+# some are 0?!? and some are 1?
+# annotation in excel clarified there were 276 samples from human and environment but split not given
+db5$total_domains[19]<-2
+db5$total_samples[19]<-276
+db5$env_bin[19] = 1
+db5$human_bin[19] = 1
+
+names(db5)
+ggplot(db5, aes(x=total_samples, fill=agent_hse_cat)) +
+  geom_histogram()+
+  theme(legend.position="top")+
+  theme_classic()+
+  labs(x="total samples", y = "domains")+
+  scale_x_continuous(trans='log10')
