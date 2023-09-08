@@ -224,8 +224,8 @@ ggplot(db5, aes(x=total_samples, fill=agent_hse_cat)) +
 names(db5)
 db5$time_to_pub = db5$publication_year-as.numeric(db5$last_sample_date)
 ggplot(db5, aes(x=time_to_pub, fill=study_aim_1)) +
-  geom_histogram()+
+  geom_density(alpha = 0.4)+
   theme(legend.position="top")+
+  # facet_wrap(~study_aim_1, nrows = 5) +
   theme_classic()+
   labs(x="years from last collection to publication", y = "papers")
-  scale_x_continuous(trans='log2')
