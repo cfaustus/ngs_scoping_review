@@ -213,3 +213,19 @@ ggplot(db5, aes(x=total_samples, fill=agent_hse_cat)) +
   theme_classic()+
   labs(x="total samples", y = "domains")+
   scale_x_continuous(trans='log10')
+
+# The 4 I’m about to paste should be good, papers by sequencer needs a tiny amount of re-working and inclusion of start-end dates for the various platforms. Christina will focus on this.
+# Figure 5: histogram of total study’s sample size (irrespective of the domain) coloured by agent_type. Jayna would mind taking care of this?
+#   Figure 6: time gap between last_sample_date and publication_year coloured by study_aim_1. Christina is that OK for you to do it?
+#   Figure 7: histogram/test of phylo_results connected to total study’s sample size (irrespective of the domain). Jayna I’d leave this with you if OK.
+# M&M + Results sections: for you both to write down elements connected with these analyses/figures.
+# I’ll check that the EMBO journal’s guidelines suit this paper, we agreed on giving it a try. I’ll focus on formatting the article, the rest of the writing, suppl. mat., Table 3 (a summary of zoonotic agents and study aims).
+
+names(db5)
+db5$time_to_pub = db5$publication_year-as.numeric(db5$last_sample_date)
+ggplot(db5, aes(x=time_to_pub, fill=study_aim_1)) +
+  geom_histogram()+
+  theme(legend.position="top")+
+  theme_classic()+
+  labs(x="years from last collection to publication", y = "papers")
+  scale_x_continuous(trans='log2')
