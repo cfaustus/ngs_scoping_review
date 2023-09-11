@@ -126,7 +126,9 @@ ggplot(db4_summary, aes(x = publication_year, y = ngs_platform_short_primary )) 
                                     max(db4_summary$papers)),
                          labels = c("1",
                                     "3",
-                                    "9"))
+                                    "9"))+
+  geom_rect(aes(xmin = 2011, xmax = 2022, ymin = "Illumina_HiSeq", ymax = "Illumina_HiSeq"))+
+  annotate("rect", x = 2011, y = 2022, ymin = 12, ymax = 28)
 # need to combine short read and long read sequencing
 
 # is within host diversity studies predicted by mutation rate?
