@@ -1,4 +1,4 @@
-company,type,sequence,unit,publication_year
+company,type,ngs_platform_primary,unit,publication_year
 BGI,MGISEQ2000,BGI_MGISEQ2000,start,2018
 Illumina,iSeq100,Illumina_iSeq100,start,2018
 Illumina,NovaSeq,Illumina_NovaSeq,start,2017
