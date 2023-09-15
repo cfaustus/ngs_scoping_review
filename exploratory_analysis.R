@@ -73,8 +73,8 @@ ggplot(db, aes(x=total_samples, y = total_domains, col=study_aim_1)) +
   theme_classic()+
   labs(x="total samples", y = "domains")+
   scale_x_continuous(trans='log10')
-
-ggplot(db, aes(x=total_samples, y = total_domains, col=agent_type)) +
+db$agent_hse_cat
+ggplot(db, aes(x=total_samples, y = total_domains, col= agent_hse_cat)) +
   geom_point()+
   theme(legend.position="top")+
   theme_classic()+
@@ -83,54 +83,54 @@ ggplot(db, aes(x=total_samples, y = total_domains, col=agent_type)) +
 
 # https://cran.r-project.org/web/packages/ggalluvial/vignettes/ggalluvial.html
 head(db)
-db_allu = is_alluvia_form(as.data.frame(db), axes = 1:3, silent = TRUE)
-ggplot(data = db,
-       aes(x = publication_year, y = total_samples, alluvium = study_aim_1)) +
-  geom_alluvium(aes(fill = study_aim_1, colour = study_aim_1),
-                alpha = .75, decreasing = FALSE) 
-  scale_x_continuous(breaks = seq(2003, 2013, 2)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = -30, hjust = 0)) +
-  scale_fill_brewer(type = "qual", palette = "Set3") +
-  scale_color_brewer(type = "qual", palette = "Set3") +
-  facet_wrap(~ region, scales = "fixed") +
-  ggtitle("refugee volume by country and region of origin")
+
   
 
-db$ngs_platform_short_primary
-head(db)
+
 db_summary = as.data.frame(db %>% group_by(ngs_platform_primary, publication_year) %>%
                                 summarise(papers = n()))
-db_summary$ngs_platform_primary=as.factor(db_summary$ngs_platform_primary)
+db_summary = db_summary[!db_summary$ngs_platform_primary == 'Illumina_N/S',]
+db_summary = db_summary[!db_summary$ngs_platform_primary == 'N/S',]
 
-db_summary = db_summary[1:45,]
-db_summary$ngs_platform_short_primary
-unique(db$ngs_platform_primary)
+db_summary_v2 = as.data.frame(db %>% group_by(ngs_platform_complement, publication_year) %>%
+                             summarise(papers_sec = n()))
+db_summary_v2 = db_summary_v2[!db_summary_v2$ngs_platform_complement == 'N/S',]
+db_summary_v2 = db_summary_v2[!db_summary_v2$ngs_platform_complement == 'no',]
 
-db_summary$ngs_platform_primary = as.factor(db_summary$ngs_platform_primary)
+db_platform <- merge(x=db_summary,y=db_summary_v2, by.x=c("ngs_platform_primary","publication_year"), 
+             by.y=c("ngs_platform_complement","publication_year"), all = TRUE)
+db_platform$tot_papers = rowSums(db_platform[,c('papers_sec','papers')], na.rm = TRUE)
 
-levels(db_summary$ngs_platform_primary)
-db_summary$ngs_platform_primary <- factor(db_summary$ngs_platform_primary, 
+db_platform$ngs_platform_primary=as.factor(db_platform$ngs_platform_primary)
+
+levels(db_platform$ngs_platform_primary)
+db_platform$ngs_platform_primary <- factor(db_platform$ngs_platform_primary, 
                 levels = c("BGI_MGISEQ2000", "Illumina_iSeq100","Illumina_NovaSeq",
                            "BGI_BGISEQ50", 
-                           "BGI_BGISEQ500", "ONT_MinION","Illumina_NextSeq", 
+                           "BGI_BGISEQ500", "ONT_MinION","Illumina_NextSeq", "PacBio_RSII",
                            "Illumina_MiSeq", "IonTorrent_IonPGM", 
                            "Illumina_HiSeq", "Illumina_GAIIx", 
                             "Roche_454"))
 
-ggplot(db_summary, aes(x = publication_year, y = ngs_platform_short_primary )) +
-  geom_point(aes(size = papers, color = ngs_platform_company))+ # aes(dotsize = papers),
-  scale_x_continuous(breaks=seq(2011,2022,1))+
+seq = read.csv('data/sequencing_tech_v2.csv', header = TRUE)
+names(seq)
+seq_trun = seq[,c('company', 'sequence')]
+db_platform <- merge(x=db_platform,y=seq_trun, by.x=c("ngs_platform_primary"), 
+                     by.y=c("sequence"), all = TRUE)
+seq3 = read.csv('data/sequencing_tech_v3.csv', header = TRUE)
+
+ggplot(db_platform, aes(x = publication_year, y = ngs_platform_primary )) +
+  geom_point(aes(size = tot_papers, color = company))+ # aes(dotsize = papers),
+  scale_x_continuous(limits = c(2006,2024), breaks=seq(2006,2024,1))+
   theme_classic()+
-  labs(x="publication year", y = "sequencer")+
-  scale_size_continuous(breaks = c(min(db_summary$papers),
+  labs(x="year", y = "sequencer")+
+  scale_size_continuous(breaks = c(min(db_platform$tot_papers),
                                     3,
-                                    max(db_summary$papers)),
+                                    max(db_platform$tot_papers)),
                          labels = c("1",
                                     "3",
                                     "9"))+
-  geom_rect(aes(xmin = 2011, xmax = 2022, ymin = "Illumina_HiSeq", ymax = "Illumina_HiSeq"))+
-  annotate("rect", x = 2011, y = 2022, ymin = 12, ymax = 28)
+  geom_line(data = seq3, aes(y = ngs_platform_primary,x = publication_year, color = company))
 # need to combine short read and long read sequencing
 
 # is within host diversity studies predicted by mutation rate?
@@ -162,21 +162,20 @@ ggplot(data = db_summary2,
 # figure - sample size by HG status?
 # software updates? license 
 
-db5 = read.csv('data/NGSscoping_dbv5.csv')
-names(db5)<-tolower(names(db5))
-db5$geo_scope = ifelse(db5$lic_lmic == 'yes' & db5$umic_hic == 'yes', 'both',
-                       ifelse(db5$lic_lmic == 'yes', 'lmic', 'hic'))
 
-db5$public_code
-db5$public_data_binary = !db5$public_data == 'N/A'
-db5$public_code_binary = db5$public_code == 'yes'
-db5$phylo_software_binary = db5$assembly.mapping_license == 'free'
-db5_summary2 = as.data.frame(db5 %>% group_by(public_data_binary, public_code_binary, phylo_software_binary,geo_scope) %>%
+db$geo_scope = ifelse(db$lic_lmic == 'yes' & db$umic_hic == 'yes', 'both',
+                       ifelse(db$lic_lmic == 'yes', 'lmic', 'hic'))
+
+db$public_code
+db$public_data_binary = !db$public_data == 'N/A'
+db$public_code_binary = db$public_code == 'yes'
+db$phylo_software_binary = db$assembly.mapping_license == 'free'
+db_summary2 = as.data.frame(db %>% group_by(public_data_binary, public_code_binary, phylo_software_binary,geo_scope) %>%
                                summarise(Freq = n()))
 
-db5_summary2$geo_scope = as.factor(db5_summary2$geo_scope)
-db5_summary2$geo_scope = factor(db5_summary2$geo_scope, levels = c('lmic','both','hic'))
-ggplot(data = db5_summary2,
+db_summary2$geo_scope = as.factor(db_summary2$geo_scope)
+db_summary2$geo_scope = factor(db_summary2$geo_scope, levels = c('lmic','both','hic'))
+ggplot(data = db_summary2,
        aes(axis1 = phylo_software_binary, axis2 = public_data_binary,axis3 = public_code_binary, 
            y = Freq)) +
   scale_x_discrete(limits = c("software", "data", "code"), expand = c(.2, .05)) +
@@ -187,35 +186,34 @@ ggplot(data = db5_summary2,
   geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
   theme_classic() 
 
-db5 = read.csv('data/NGSscoping_dbv5.csv')
-names(db5)<-tolower(names(db5))
+# 
+# 
+# col.chr.ids = c('hum_sample_size','livestock_sample_size', 'pet_sample_size','poultry_sample_size',
+#                 'wildlife_sample_size','arachnida_sample_size', 'insecta_sample_size', 'env_domain',
+#                 'biotic.env_sample_size','abiotic_sample_size')
+# names(db)
+# db[col.chr.ids] <- sapply(db[col.chr.ids],as.numeric)
+# str(db)
 
-col.chr.ids = c('hum_sample_size','livestock_sample_size', 'pet_sample_size','poultry_sample_size',
-                'wildlife_sample_size','arachnida_sample_size', 'insecta_sample_size', 'env_domain',
-                'biotic.env_sample_size','abiotic_sample_size')
-names(db5)
-db5[col.chr.ids] <- sapply(db5[col.chr.ids],as.numeric)
-str(db5)
-
-db5$total_samples = rowSums(db5[,c('hum_sample_size','ani_sample_size', 'env_domain')], na.rm=TRUE)
-db5$env_bin = ifelse(db5$env_domain>0,1,0)
-db5$ani_bin = ifelse(db5$ani_sample_size>0,1,0)
-db5$human_bin = ifelse(db5$hum_sample_size>0,1,0)
-db5$total_domains = rowSums(db5[,c('env_bin','ani_bin','human_bin')], na.rm=T)
+db$total_samples = rowSums(db[,c('hum_sample_size','ani_sample_size', 'env_domain')], na.rm=TRUE)
+db$env_bin = ifelse(db$env_domain>0,1,0)
+db$ani_bin = ifelse(db$ani_sample_size>0,1,0)
+db$human_bin = ifelse(db$hum_sample_size>0,1,0)
+db$total_domains = rowSums(db[,c('env_bin','ani_bin','human_bin')], na.rm=T)
 
 # some are 0?!? and some are 1?
 # annotation in excel clarified there were 276 samples from human and environment but split not given
-db5$total_domains[19]<-2
-db5$total_samples[19]<-276
-db5$env_bin[19] = 1
-db5$human_bin[19] = 1
+db$total_domains[19]<-2
+db$total_samples[19]<-276
+db$env_bin[19] = 1
+db$human_bin[19] = 1
 
-names(db5)
-ggplot(db5, aes(x=total_samples, fill=agent_hse_cat)) +
+names(db)
+ggplot(db, aes(x=total_samples, fill=study_aim_1)) +
   geom_histogram()+
   theme(legend.position="top")+
   theme_classic()+
-  labs(x="total samples", y = "domains")+
+  labs(x="total samples", y = "publications")+
   scale_x_continuous(trans='log10')
 
 # The 4 I’m about to paste should be good, papers by sequencer needs a tiny amount of re-working and inclusion of start-end dates for the various platforms. Christina will focus on this.
@@ -225,10 +223,10 @@ ggplot(db5, aes(x=total_samples, fill=agent_hse_cat)) +
 # M&M + Results sections: for you both to write down elements connected with these analyses/figures.
 # I’ll check that the EMBO journal’s guidelines suit this paper, we agreed on giving it a try. I’ll focus on formatting the article, the rest of the writing, suppl. mat., Table 3 (a summary of zoonotic agents and study aims).
 
-names(db5)
-db5$time_to_pub = db5$publication_year-as.numeric(db5$last_sample_date)
-ggplot(db5, aes(x=time_to_pub, fill=study_aim_1)) +
-  geom_density(alpha = 0.4)+
+names(db)
+db$time_to_pub = db$publication_year-as.numeric(db$last_sample_date)
+ggplot(db, aes(x=time_to_pub, fill=study_aim_1)) +
+  geom_histogram()+
   theme(legend.position="top")+
   # facet_wrap(~study_aim_1, nrows = 5) +
   theme_classic()+
