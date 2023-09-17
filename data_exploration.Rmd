@@ -73,8 +73,9 @@ ggplot(aes(`sample size`, group = STUDY_AIM_1, fill = STUDY_AIM_1)) +
   theme(legend.position = "right")
 
 hist_sample_size_compartment_aim
+
 hist_sample_size_compartment_aim <-
-  ggsave(filename = "figures/histogram_sample_size_by_compartment_colored_by_study_aim.pdf", width=14, height = 8)
+  ggsave(filename = "figures/histogram_sample_size_by_compartment_colored_by_study_aim.pdf", width=8, height = 8)
 
 ```
 
@@ -98,13 +99,39 @@ ggplot(aes(`sample size`, group = AGENT_TYPE, fill = AGENT_TYPE)) +
   ylab("count") + 
   facet_wrap(~compartment, nrow = 4) +
   ggthemes::theme_clean() + 
-  scale_fill_manual(values = c("skyblue2", "royalblue3", "green4", "lightpink2", "orange1")) + 
+  # scale_fill_manual(values = c("skyblue2", "royalblue3", "green4", "lightpink2", "orange1")) + 
+  scale_fill_ordinal()+
   theme(legend.position = "bottom")
 
 
 hist_sample_size_compartment_agent_type
 hist_sample_size_compartment_agent_type |>
-  ggsave(filename = "figures/histogram_sample_size_by_compartment_colored_by_agent_type.pdf", width=14, height = 8)
+  ggsave(filename = "figures/histogram_sample_size_by_compartment_colored_by_agent_type.pdf", width=8, height = 8)
+
+
+hist_sample_size_by_agent_type_only <-
+data |>
+  mutate(ARACHNIDA_SAMPLE_SIZE = as.character(ARACHNIDA_SAMPLE_SIZE)) |>
+  mutate(INSECTA_SAMPLE_SIZE = as.character(INSECTA_SAMPLE_SIZE)) |>
+  select(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, `BIOTIC-ENV_SAMPLE_SIZE`, AGENT_TYPE) |>
+  pivot_longer(cols = c(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, `BIOTIC-ENV_SAMPLE_SIZE`), names_to = "compartment" , values_to = "sample size") |>
+  separate(col = "compartment", into = c("compartment", NA, NA), sep = "_", extra = "drop") |>
+  mutate(`sample size` = as.numeric(`sample size`)) |>
+  mutate(compartment = ifelse(compartment == "HUM", "HUMAN", compartment)) |>
+  mutate(AGENT_TYPE = ifelse(str_detect(AGENT_TYPE, "bacterium") == TRUE, "bacterium", AGENT_TYPE)) |>
+     mutate(AGENT_TYPE = ifelse(str_detect(AGENT_TYPE, "virus") == TRUE, "virus", AGENT_TYPE)) |>
+ggplot(aes(`sample size`, group = AGENT_TYPE, fill = AGENT_TYPE)) + 
+  geom_histogram(bins = 20) + 
+  scale_x_log10() + 
+  xlab("Sample size") + 
+  ylab("count") + 
+  ggthemes::theme_clean() + 
+  # scale_fill_manual(values = c("skyblue2", "royalblue3", "green4", "lightpink2", "orange1")) + 
+  scale_fill_ordinal()+
+  theme(legend.position = "bottom")
+
+hist_sample_size_by_agent_type_only |>
+  ggsave(filename = "figures/histogram_sample_size_colored_by_agent_type.pdf", width=8, height = 8)
 
 ```
 
@@ -223,5 +250,32 @@ data |>
   filter(!(is.na(PHYLO_MODEL))) |>
   ggplot(aes(PHYLO_MODEL, freq, fill = PHYLO_RESULTS)) + geom_col(stat = "identity", position = position_dodge()) + ggthemes::scale_fill_pander() + ggthemes::theme_clean() + xlab("Phylo Model") + theme(legend.position="top",legend.justification="centre")
 
+```
+
+```{r}
+
+study_sample_size_phylo_results <-
+data |>
+  mutate(ARACHNIDA_SAMPLE_SIZE = as.character(ARACHNIDA_SAMPLE_SIZE)) |>
+  mutate(INSECTA_SAMPLE_SIZE = as.character(INSECTA_SAMPLE_SIZE)) |>
+  select(PHYLO_RESULTS,
+         HUM_SAMPLE_SIZE, 
+         POULTRY_SAMPLE_SIZE, 
+         LIVESTOCK_SAMPLE_SIZE, 
+         WILDLIFE_SAMPLE_SIZE, 
+         PET_SAMPLE_SIZE, 
+         ARACHNIDA_SAMPLE_SIZE, 
+         INSECTA_SAMPLE_SIZE, 
+         `BIOTIC-ENV_SAMPLE_SIZE`) |>
+  pivot_longer(cols = c(HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, `BIOTIC-ENV_SAMPLE_SIZE`), names_to = "compartment" , values_to = "sample size") |>
+  mutate(`sample size` = as.numeric(`sample size`)) |>
+  mutate(compartment = ifelse(compartment == "HUM", "HUMAN", compartment)) |> 
+select(PHYLO_RESULTS, `sample size`) |>
+  filter(!is.na(`sample size`)) |>
+  filter(`sample size` > 0) |>
+  ggplot(aes(`sample size`, fill = PHYLO_RESULTS)) + geom_histogram(bins = 30) + scale_x_log10() + ggthemes::scale_fill_pander() + ggthemes::theme_clean() + xlab("Sample size") + theme(legend.position="top",legend.justification="centre")
+
+study_sample_size_phylo_results |>
+  ggsave(filename = "figures/stacked_histogram_study_sample_size_phylo_results.pdf", width = 8)
 ```
 
