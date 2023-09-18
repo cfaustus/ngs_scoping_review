@@ -38,6 +38,8 @@ db$human_bin[ind] = 1
 
 
 
+
+
 # by publication year
 sort(unique(db$publication_year))
 library(ggplot2)
@@ -233,3 +235,33 @@ ggplot(db5, aes(x=time_to_pub, fill=study_aim_1)) +
   # facet_wrap(~study_aim_1, nrows = 5) +
   theme_classic()+
   labs(x="years from last collection to publication", y = "papers")
+
+
+library(stats)
+library(MASS)
+library(dplyr, warn.conflicts= FALSE)
+library(ggplot2)
+library(GlmSimulatoR)
+
+db5$total_domains
+glmP1 <- glm(total_samples ~ 1, data = db5, family = poisson(link = "log"))
+summary(glmP1)
+
+glmNB <- glm.nb(total_samples ~ 1, data = db5, link = "log")
+summary(glmNB)
+
+names(db5)
+glmNB <- glm.nb(total_samples ~ env_bin + ani_bin + agent_hse_cat + study_aim_1, data = db5, link = "log")
+summary(glmNB)
+
+glmNB2 <- glm.nb(total_samples ~ study_aim_1, data = db5, link = "log")
+summary(glmNB2)
+
+glmNB3 <- glm.nb(total_samples ~ ani_bin + env_bin, data = db5, link = "log")
+summary(glmNB3)
+
+glmNB4 <- glm.nb(total_samples ~ agent_hse_cat, data = db5, link = "log")
+summary(glmNB4)
+
+glmNB4 <- glm.nb(total_samples ~ phylo_results, data = db5, link = "log")
+summary(glmNB4)
