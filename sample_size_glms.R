@@ -3,12 +3,6 @@
 # LIBRARIES REQUIRED
 library(ggplot2)
 library(stats)
-library(sandwich)
-library(MASS)
-library(dplyr, warn.conflicts= FALSE)
-library(GlmSimulatoR)
-library(DHARMa)
-
 
 # IMPORTING DATA & FORMATTING
 db <- read.csv("data/NGSscoping_dbv6.csv", header = TRUE)
