@@ -2,6 +2,10 @@
 
 # LIBRARIES REQUIRED
 library(ggplot2)
+library(stats)
+library(MASS)
+library(dplyr, warn.conflicts= FALSE)
+library(GlmSimulatoR)
 
 
 # IMPORTING DATA & FORMATTING
@@ -39,27 +43,19 @@ ggplot(db, aes(x=total_samples, fill=agent_type)) +
   geom_histogram()+
   theme(legend.position="top")+
   theme_classic()+
-  labs(x="total samples", y = "domains")+
+  labs(x="total samples", y = "total")+
+  scale_x_continuous(trans='log10')
+
+ggplot(db, aes(x=total_samples, fill=as.factor(total_domains))) +
+  geom_density(alpha = 0.5)+
+  theme(legend.position="top")+
+  theme_classic()+
+  labs(x="total samples", y = "density")+
   scale_x_continuous(trans='log10')
 
 
-names(db5)
-db5$time_to_pub = db5$publication_year-as.numeric(db5$last_sample_date)
-ggplot(db5, aes(x=time_to_pub, fill=study_aim_1)) +
-  geom_density(alpha = 0.4)+
-  theme(legend.position="top")+
-  # facet_wrap(~study_aim_1, nrows = 5) +
-  theme_classic()+
-  labs(x="years from last collection to publication", y = "papers")
+# model construction
 
-
-library(stats)
-library(MASS)
-library(dplyr, warn.conflicts= FALSE)
-library(ggplot2)
-library(GlmSimulatoR)
-
-db5$total_domains
 glmP1 <- glm(total_samples ~ 1, data = db5, family = poisson(link = "log"))
 summary(glmP1)
 
