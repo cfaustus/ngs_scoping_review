@@ -1,6 +1,16 @@
 
 # code to explore and visualize dataset
 
+# color pallettes
+# agent types 8 categories (5 discrete - 3 virus, 2 bacteria)
+# c(
+'#D1B490','#EE7B30','#CBCBD4',
+'#56766E','#ACC3BD','#2B3B37'
+'#885A89','#3D283E')
+# study aim 5 categories (discrete) < jaynas
+# 6 colours for sequencers
+wes anderson Zissou
+
 # libraries
 library(ggplot2)
 library(ggalluvial)
