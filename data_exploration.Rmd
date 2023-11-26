@@ -20,7 +20,7 @@ library(readxl)
 ```{r, echo=FALSE, warning=FALSE}
 # read data
 
-data <- read_excel("data/NGSscoping_dbv5.xlsx")
+data <- read_excel("data/NGSscoping_dbv6.xlsx")
 
 ```
 
