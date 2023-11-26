@@ -142,7 +142,7 @@ db$phylo_software_binary = !db$phylo_software == 'Geneious'
 db$sampling_geo
 
 db_summary2 = as.data.frame(db %>% group_by(public_data_binary, public_code_binary, phylo_software_binary,sampling_geo) %>%
-                              summarise(Freq = n()))
+                              dplyr::summarise(Freq = n()))
 
 ggplot(data = db_summary2,
        aes(axis1 = as.factor(phylo_software_binary), axis2 = public_data_binary,axis3 = public_code_binary, 
