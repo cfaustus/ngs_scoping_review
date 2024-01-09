@@ -19,7 +19,7 @@ library(plyr)
 library(wesanderson)
 
 # importing and correctly formatting data
-db <- read.csv("data/NGSscoping_dbv6.csv", header = TRUE)
+db <- read.csv("data/NGSscoping-db-final.csv", header = TRUE)
 names(db)<-tolower(names(db))
 db$biotic.env_sample_size
 colnames(db)[29] <- 'biotic_env_sample_size'
@@ -89,8 +89,7 @@ ggplot(db, aes(x=publication_year, fill=study_aim_1)) +
 
 # NGS Sequencers over time
 # NGS company
-read = 
-head(db)
+
 
 db_platform = as.data.frame(db %>% group_by(ngs_platform_primary, publication_year) %>%
                              dplyr::summarise(papers = n()))
@@ -206,3 +205,30 @@ ggplot(db, aes(x=time_to_pub, fill=study_aim_1)) +
   labs(x="years from last collection to publication", y = "papers")
 
 
+study_aim_dens = ggplot(db, aes(x=time_to_pub, fill=study_aim_1)) +
+  geom_density(alpha = 0.80)+
+  facet_wrap(~study_aim_1, nrow= 5) +
+  scale_fill_manual(values = aim_col)+
+  theme_classic()+
+  geom_vline(data=db_me, aes(xintercept=time_to_pub, colour=study_aim_1),
+             linetype="solid", size=0.5) +
+  geom_vline(data=db_mean, aes(xintercept=time_to_pub, colour=study_aim_1),
+             linetype="dashed", size=0.5) +
+  theme(legend.position = "none")+
+  scale_color_manual(values = aim_col)+
+  labs(x="years from last sample collection to publication", y = "density")
+
+study_aim_hist = ggplot(db, aes(x=publication_year, fill=study_aim_1)) +
+  geom_histogram(col = 'white', position="stack", bins = 12)+
+  facet_wrap(~study_aim_1, nrow= 5) +
+  scale_fill_manual(values = aim_col)+
+  theme_classic()+
+  labs(x="year published", y = "publications")+
+  scale_y_continuous(expand = c(0, 0), breaks=seq(0,10,2))+
+  theme(legend.position = "none")+
+  scale_x_continuous(breaks=seq(2011,2022,2))
+
+
+library(patchwork)
+# Labels for each plot
+study_aim_hist + study_aim_dens + plot_annotation(tag_levels = "A")
