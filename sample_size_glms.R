@@ -8,7 +8,7 @@ library(stats)
 db <- read.csv("data/NGSscoping-db-final.csv", header = TRUE)
 names(db)<-tolower(names(db))
 
-colnames(db)[29] <- 'biotic_env_sample_size' # changing names to 
+colnames(db)[29] <- 'biotic_env_sample_size' # changing names to lower case
 
 str(db) # a lot of numeric columns are read in as characters
 col.chr.ids = c('hum_sample_size','livestock_sample_size', 'pet_sample_size','poultry_sample_size',
