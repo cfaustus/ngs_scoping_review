@@ -5,7 +5,7 @@ library(ggplot2)
 library(stats)
 
 # IMPORTING DATA & FORMATTING
-db <- read.csv("data/NGSscoping_dbv6.csv", header = TRUE)
+db <- read.csv("data/NGSscoping-db-final.csv", header = TRUE)
 names(db)<-tolower(names(db))
 
 colnames(db)[29] <- 'biotic_env_sample_size' # changing names to 
