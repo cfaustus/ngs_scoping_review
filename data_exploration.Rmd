@@ -12,7 +12,8 @@ library(tidyverse)
 library(ggpubr)
 library(patchwork)
 library(ggsci)
-library(readxl)
+library(ggthemes)
+# library(readxl)
 
 ```
 
@@ -20,7 +21,7 @@ library(readxl)
 ```{r, echo=FALSE, warning=FALSE}
 # read data
 
-data <- read_excel("data/NGSscoping_db_final.xlsx")
+data <- read.csv("data/NGSscoping-db-final.csv")
 
 ```
 
