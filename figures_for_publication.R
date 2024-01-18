@@ -1,15 +1,4 @@
-
 # code to explore and visualize dataset
-
-# color pallettes
-# agent types 8 categories (5 discrete - 3 virus, 2 bacteria)
-# # c(
-# '#D1B490','#EE7B30','#CBCBD4',
-# '#56766E','#ACC3BD','#2B3B37'
-# '#885A89','#3D283E')
-# study aim 5 categories (discrete) < jaynas
-# 6 colours for sequencers
-# wes anderson Zissou
 
 # libraries
 library(ggplot2)
@@ -17,14 +6,13 @@ library(ggalluvial)
 library(dplyr)
 library(plyr)
 library(wesanderson)
+library(patchwork)
 
 # importing and correctly formatting data
 db <- read.csv("data/NGSscoping-db-final.csv", header = TRUE)
 names(db)<-tolower(names(db))
 db$biotic.env_sample_size
 colnames(db)[29] <- 'biotic_env_sample_size'
-
-#'env_domain' looks like a sample size.... 
 
 str(db) # lots of columns coming up as characters
 col.chr.ids = c('hum_sample_size','livestock_sample_size', 'pet_sample_size','poultry_sample_size',
@@ -40,15 +28,12 @@ db$ani_bin = ifelse(db$ani_sample_size>0,1,0)
 db$human_bin = ifelse(db$hum_sample_size>0,1,0)
 db$total_domains = rowSums(db[,c('env_bin','ani_bin','human_bin')], na.rm=T)
 
-# some are 0?!? and some are 1?
 # annotation in excel clarified there were 276 samples from human and environment but split not given
-
 ind = which(db$total_samples == 0)
 db$total_domains[ind]<-2
 db$total_samples[ind]<-276
 db$env_bin[ind] = 1
 db$human_bin[ind] = 1
-
 
 # temporal trends
 sort(unique(db$publication_year))
@@ -56,7 +41,7 @@ sort(unique(db$publication_year))
 db = db |> mutate(agent_type = ifelse(str_detect(agent_type, "bacterium") == TRUE, "bacterium", agent_type)) |>
   mutate(agent_type = ifelse(str_detect(agent_type, "virus") == TRUE, "virus", agent_type))
 
-#  figure 1 - annual trend by pathogen type
+# figure 1 - annual trend by pathogen type
 ggplot(db, aes(x=publication_year, fill=agent_type)) +
   geom_histogram(col = 'white', position="stack", bins = 12)+
   theme(legend.position="top")+
@@ -88,20 +73,16 @@ ggplot(db, aes(x=publication_year, fill=study_aim_1)) +
 
 
 # NGS Sequencers over time
-# NGS company
-
-
 db_platform = as.data.frame(db %>% group_by(ngs_platform_primary, publication_year) %>%
                               dplyr::summarise(papers = n()))
 db_platform$ngs_platform_primary=as.factor(db_platform$ngs_platform_primary)
 missing = grep('N/S', db_platform$ngs_platform_primary)
 db_platform= db_platform %>%  filter(!row_number() %in% missing)
 
-seq = read.csv('data/sequencing_tech_v2.csv', header = TRUE)
+seq = read.csv('data/sequencing_tech_long.csv', header = TRUE)
 names(seq)
-seq_trun = seq[,c('company', 'sequence','type')]
-db_platform <- merge(x=db_platform,y=seq_trun, by.x=c("ngs_platform_primary"), 
-                     by.y=c("sequence"), all = TRUE)
+seq_trun = seq[,c('company', 'ngs_platform_primary','type')]
+db_platform <- merge(x=db_platform,y=seq_trun, by = "ngs_platform_primary", all = TRUE)
 
 db_platform$type = as.factor(db_platform$type)
 db_platform$type <- factor(db_platform$type, 
@@ -111,10 +92,6 @@ db_platform$type <- factor(db_platform$type,
                                       "MiSeq", "IonPGM", 
                                       "HiSeq", "GAIIx", 
                                       "454"))
-
-
-seq3 = read.csv('data/sequencing_tech_v3.csv', header = TRUE)
-
 seq_col = wes_palette('Darjeeling1', 6, type = c("continuous"))
 
 ggplot(db_platform, aes(x = publication_year, y = type)) +
@@ -123,18 +100,15 @@ ggplot(db_platform, aes(x = publication_year, y = type)) +
   theme_classic()+
   labs(x="publication year", y = "sequencer")+
   scale_color_manual(values = seq_col)+
-  geom_line(data = seq3, aes(y = type,x = publication_year, color = company))+
-  scale_size_continuous(breaks = c(min(db_summary$papers),
+  geom_line(data = seq, aes(y = type,x = publication_year, color = company))+
+  scale_size_continuous(breaks = c(min(db_platform$papers),
                                    3,
-                                   max(db_summary$papers)),
+                                   max(db_platform$papers)),
                         labels = c("1",
                                    "3",
                                    "9"))
 
-
-
 # alluvial plot to make
-
 db$public_data_binary = !db$public_data == 'N/A'
 db$public_code_binary = db$public_code == 'yes'
 db$phylo_software_binary = !db$phylo_software == 'Geneious'
@@ -152,10 +126,6 @@ ggplot(data = db_summary2,
   geom_stratum() +
   geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
   theme_minimal() 
-# need to update with stefano's linkages
-# figure - sample size by HG status?
-# software updates? license 
-
 
 db$geo_scope = ifelse(db$lic_lmic == 'yes' & db$umic_hic == 'yes', 'both',
                       ifelse(db$lic_lmic == 'yes', 'lmic', 'hic'))
@@ -165,7 +135,7 @@ db$public_data_binary = !db$public_data == 'N/A'
 db$public_code_binary = db$public_code == 'yes'
 db$phylo_software_binary = db$assembly.mapping_license == 'free'
 db_summary2 = as.data.frame(db %>% group_by(public_data_binary, public_code_binary, phylo_software_binary,geo_scope) %>%
-                              summarise(Freq = n()))
+                              dplyr::summarise(Freq = n()))
 
 db_summary2$geo_scope = as.factor(db_summary2$geo_scope)
 db_summary2$geo_scope = factor(db_summary2$geo_scope, levels = c('lmic','both','hic'))
@@ -181,12 +151,8 @@ ggplot(data = db_summary2,
   theme_classic() 
 
 
-
-
-names(db)
 db$time_to_pub = db$publication_year-as.numeric(db$last_sample_date)
 aim_col = wes_palette('AsteroidCity3', 5, type = c("continuous"))
-aim_col
 db_me <- ddply(db, .(study_aim_1), numcolwise(median, na.rm = TRUE))
 db_mean <- ddply(db, .(study_aim_1), numcolwise(mean, na.rm = TRUE))
 
@@ -228,7 +194,5 @@ study_aim_hist = ggplot(db, aes(x=publication_year, fill=study_aim_1)) +
   theme(legend.position = "none")+
   scale_x_continuous(breaks=seq(2011,2022,2))
 
-
-library(patchwork)
 # Labels for each plot
 study_aim_hist + study_aim_dens + plot_annotation(tag_levels = "A")
