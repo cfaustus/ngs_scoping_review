@@ -92,7 +92,7 @@ ggplot(db, aes(x=publication_year, fill=study_aim_1)) +
 
 
 db_platform = as.data.frame(db %>% group_by(ngs_platform_primary, publication_year) %>%
-                             dplyr::summarise(papers = n()))
+                              dplyr::summarise(papers = n()))
 db_platform$ngs_platform_primary=as.factor(db_platform$ngs_platform_primary)
 missing = grep('N/S', db_platform$ngs_platform_primary)
 db_platform= db_platform %>%  filter(!row_number() %in% missing)
@@ -105,12 +105,12 @@ db_platform <- merge(x=db_platform,y=seq_trun, by.x=c("ngs_platform_primary"),
 
 db_platform$type = as.factor(db_platform$type)
 db_platform$type <- factor(db_platform$type, 
-                                           levels = c("MGISEQ2000", "iSeq100","NovaSeq",
-                                                      "BGISEQ50", 
-                                                      "BGISEQ500", "MinION","NextSeq",'RSII',
-                                                      "MiSeq", "IonPGM", 
-                                                      "HiSeq", "GAIIx", 
-                                                      "454"))
+                           levels = c("MGISEQ2000", "iSeq100","NovaSeq",
+                                      "BGISEQ50", 
+                                      "BGISEQ500", "MinION","NextSeq",'RSII',
+                                      "MiSeq", "IonPGM", 
+                                      "HiSeq", "GAIIx", 
+                                      "454"))
 
 
 seq3 = read.csv('data/sequencing_tech_v3.csv', header = TRUE)
@@ -158,14 +158,14 @@ ggplot(data = db_summary2,
 
 
 db$geo_scope = ifelse(db$lic_lmic == 'yes' & db$umic_hic == 'yes', 'both',
-                       ifelse(db$lic_lmic == 'yes', 'lmic', 'hic'))
+                      ifelse(db$lic_lmic == 'yes', 'lmic', 'hic'))
 
 db$public_code
 db$public_data_binary = !db$public_data == 'N/A'
 db$public_code_binary = db$public_code == 'yes'
 db$phylo_software_binary = db$assembly.mapping_license == 'free'
 db_summary2 = as.data.frame(db %>% group_by(public_data_binary, public_code_binary, phylo_software_binary,geo_scope) %>%
-                               summarise(Freq = n()))
+                              summarise(Freq = n()))
 
 db_summary2$geo_scope = as.factor(db_summary2$geo_scope)
 db_summary2$geo_scope = factor(db_summary2$geo_scope, levels = c('lmic','both','hic'))
