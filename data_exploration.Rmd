@@ -13,6 +13,8 @@ library(ggpubr)
 library(patchwork)
 library(ggsci)
 library(ggthemes)
+library(wesanderson)
+library(patchwork)
 # library(readxl)
 
 ```
@@ -22,6 +24,12 @@ library(ggthemes)
 # read data
 
 data <- read.csv("data/NGSscoping-db-final.csv")
+
+```
+
+```{r, echo=FALSE, warning=FALSE}
+# color schemes
+aim_col = wes_palette('AsteroidCity3', 5, type = c("continuous"))
 
 ```
 
@@ -48,6 +56,9 @@ data |>
 stacked_hist_sample_size_compartment
 # stacked_hist_sample_size_compartment |>
 #   ggsave(filename = "figures/stacked_histogram_sample_size_by_compartment.pdf", width=8)
+
+study_aim_hist + study_aim_dens + plot_annotation(tag_levels = "A")
+
 ```
 
 ```{r, echo=FALSE, fig.width = 8 ,warning=FALSE}
@@ -135,8 +146,70 @@ hist_sample_size_by_agent_type_only
 hist_sample_size_by_agent_type_only |>
   ggsave(filename = "figures/histogram_sample_size_colored_by_agent_type.pdf", width=8, height = 8)
 
+# multipanel plot
+(hist_sample_size_compartment_agent_type + hist_sample_size_by_agent_type_only + plot_annotation(tag_levels = "A") +
+  plot_layout(widths = c(5,2),guides = "collect") & theme(legend.position="bottom") & theme(panel.background = element_rect(fill = "transparent",color = NA))) |>
+  ggsave(filename = "figures/fig4_histogram_sample_size_colored_by_agent_type.pdf", width=12, height = 6)
+
+
 ```
 
+```{r, echo=FALSE, fig.width = 8 ,warning=FALSE}
+# 
+data$STUDY_AIM_1
+hist_sample_size_motivations<-
+data |>
+  mutate(ARACHNIDA_SAMPLE_SIZE = as.character(ARACHNIDA_SAMPLE_SIZE)) |>
+  mutate(INSECTA_SAMPLE_SIZE = as.character(INSECTA_SAMPLE_SIZE)) |>
+  select(ABIOTIC_SAMPLE_SIZE, HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC_SAMPLE_SIZE, STUDY_AIM_1) |>
+  pivot_longer(cols = c(ABIOTIC_SAMPLE_SIZE, HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC_SAMPLE_SIZE), names_to = "compartment" , values_to = "sample size") |>
+  separate(col = "compartment", into = c("compartment", NA, NA), sep = "_", extra = "drop") |>
+  mutate(`sample size` = as.numeric(`sample size`)) |>
+  mutate(compartment = ifelse(compartment == "HUM", "HUMAN", compartment)) |>
+ggplot(aes(`sample size`, group = STUDY_AIM_1, fill = STUDY_AIM_1)) + 
+  geom_histogram(bins = 20) + 
+  scale_x_log10() + 
+  xlab("Sample size") + 
+  ylab("count") + 
+  facet_wrap(~compartment, nrow = 4) +
+  ggthemes::theme_clean() + 
+  scale_fill_manual(values = aim_col)+
+  theme(legend.position = "bottom")
+hist_sample_size_motivations
+
+hist_sample_size_motivations |>
+  ggsave(filename = "figures/histogram_sample_size_by_compartment_colored_by_motivation.pdf", width=10, height = 8)
+
+
+hist_sample_size_by_motivation_only <-
+data |>
+  mutate(ARACHNIDA_SAMPLE_SIZE = as.character(ARACHNIDA_SAMPLE_SIZE)) |>
+  mutate(INSECTA_SAMPLE_SIZE = as.character(INSECTA_SAMPLE_SIZE)) |>
+  select(ABIOTIC_SAMPLE_SIZE, HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC_SAMPLE_SIZE, STUDY_AIM_1) |>
+  pivot_longer(cols = c(ABIOTIC_SAMPLE_SIZE, HUM_SAMPLE_SIZE, POULTRY_SAMPLE_SIZE, LIVESTOCK_SAMPLE_SIZE, WILDLIFE_SAMPLE_SIZE, PET_SAMPLE_SIZE, ARACHNIDA_SAMPLE_SIZE, INSECTA_SAMPLE_SIZE, BIOTIC_SAMPLE_SIZE), names_to = "compartment" , values_to = "sample size") |>
+  separate(col = "compartment", into = c("compartment", NA, NA), sep = "_", extra = "drop") |>
+  mutate(`sample size` = as.numeric(`sample size`)) |>
+  mutate(compartment = ifelse(compartment == "HUM", "HUMAN", compartment)) |>
+ggplot(aes(`sample size`, group = STUDY_AIM_1, fill = STUDY_AIM_1)) + 
+  geom_histogram(bins = 20) + 
+  scale_x_log10() + 
+  xlab("Sample size") + 
+  ylab("count") + 
+  ggthemes::theme_clean() + 
+  scale_fill_manual(values = aim_col) +
+  theme(legend.position = "bottom")
+
+hist_sample_size_by_motivation_only
+hist_sample_size_by_motivation_only |>
+  ggsave(filename = "figures/histogram_sample_size_colored_by_studyaim.pdf", width=8, height = 8)
+
+# multipanel plot
+(hist_sample_size_motivations + hist_sample_size_by_motivation_only + plot_annotation(tag_levels = "A") +
+  plot_layout(widths = c(5,2),guides = "collect") & theme(legend.position="bottom") & theme(panel.background = element_rect(fill = "transparent",color = NA))) |>
+  ggsave(filename = "figures/fig_supp3_histogram_sample_size_colored_study_aim.pdf", width=14, height = 7)
+
+
+```
 # Zoonotic agent
 
 ```{r, echo=FALSE, fig.width = 6 ,warning=FALSE}
